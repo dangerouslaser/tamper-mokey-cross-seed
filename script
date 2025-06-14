@@ -1,14 +1,19 @@
 // ==UserScript==
-// @name         Vuetorrent Webhook Trigger
+// @name         Vuetorrent Webhook Trigger (GM, ollie)
 // @namespace    http://tampermonkey.net/
-// @version      1.5
-// @description  Add right-click webhook action in Vuetorrent, CORS-free using GM_xmlhttpRequest
-// @match        http://YOUR-TORRENT-CLIENT:PORT/*
+// @version      1.6
+// @description  Add right-click webhook action in Vuetorrent, CORS-free using GM_xmlhttpRequest with default JSON body
+// @include      http://*:8080/*
 // @grant        GM_xmlhttpRequest
 // ==/UserScript==
 
 (function () {
     'use strict';
+
+    const SERVER_HOST = "cross-seed"; //Cross-Seed Host
+    const API_KEY = "asdf1234"; //Your Cross-Seed API Key
+    const CROSS_SEED_PORT = "2468"; // Cross-Seed Port
+    const QBT_PORT = "8080"; //Qbittorrent Client Port - Update this above as well
 
     console.log("🟢 Vuetorrent Webhook script loaded");
 
@@ -67,9 +72,16 @@
 
             GM_xmlhttpRequest({
                 method: "POST",
-                url: `http://YOUR-SERVER:PORT/api/webhook?apikey=CROSS-SEED-API-KEY`,
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                data: `infoHash=${hash}`,
+                url: `http://${SERVER_HOST}:${CROSS_SEED_PORT}/api/webhook?apikey=${API_KEY}`,
+                headers: { "Content-Type": "application/json" },
+                data: JSON.stringify({
+                    infoHash: hash,
+                    ignoreCrossSeeds: false,
+                    ignoreExcludeRecentSearch: true,
+                    ignoreExcludeOlder: true,
+                    ignoreBlockList: false
+                    // includeSingleEpisodes and includeNonVideos omitted to let config handle them
+                }),
                 onload: function (res) {
                     alert(`✅ Webhook sent! Status: ${res.status}`);
                 },
